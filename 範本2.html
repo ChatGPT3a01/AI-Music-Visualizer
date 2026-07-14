@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>互動教學：打造你專屬的 LINE AI 助理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        .slide {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        .slide.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .step-indicator {
+            transition: all 0.3s ease;
+        }
+        .step-indicator.active {
+            background-color: #1e40af; /* Dark blue */
+            color: white;
+            transform: scale(1.1);
+        }
+        .step-indicator.completed {
+            background-color: #3b82f6; /* Blue */
+            color: white;
+        }
+        .key-item {
+            background-color: #f1f5f9; /* Slate 100 */
+            border-left: 4px solid #3b82f6; /* Blue 500 */
+            padding: 0.75rem 1rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            color: #1e3a8a; /* Blue 800 */
+        }
+    </style>
+</head>
+<body class="antialiased text-slate-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-5xl">
+
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">用最簡單的方式 打造你專屬的Line AI 機器人</h1>
+            <p class="text-slate-600 mt-4">
+                以AI小幫手做一個能幫你處理大小事的智慧夥伴
+            </p>
+            <p class="text-slate-500 mt-4 text-sm">
+                建置人：曾慶良 (阿亮老師)
+                <div class="flex justify-center space-x-4 mt-2">
+                    <a href="https://www.facebook.com/iddmail" target="_blank" class="text-blue-600 hover:underline">Facebook</a>
+                    <span>|</span>
+                    <a href="https://www.youtube.com/@Liang-yt02" target="_blank" class="text-red-600 hover:underline">YouTube</a>
+                    <span>|</span>
+                    <a href="https://thisnote.space/" target="_blank" class="text-green-600 hover:underline">AI 小幫手</a>
+                </div>
+            </p>
+        </header>
+
+        <!-- Progress Bar -->
+        <div id="progress-bar" class="flex justify-center items-center space-x-2 md:space-x-4 mb-8 flex-wrap">
+            <!-- Step indicators will be injected here by JS -->
+        </div>
+
+        <!-- Slides Container -->
+        <main id="slides-container" class="bg-white rounded-xl shadow-lg p-6 md:p-10 min-h-[450px]">
+
+            <!-- Slide 1: Introduction -->
+            <div id="slide-1" class="slide active">
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">歡迎！開始打造你的 LINE AI 機器人</h3>
+                <p class="mb-4 text-lg">想擁有一個專屬於你、能 24 小時待命的 AI 助理嗎？</p>
+                <p class="mb-4">本教學將帶你一步步設定自己的 LINE 官方帳號，並將它與強大的「AI 小幫手」平台串接。完成後，你就能擁有一個能理解對話、處理文件、錄音轉文字，甚至幫你畫圖的智慧夥伴！</p>
+                <p class="font-semibold text-xl mb-4">本次教學流程：</p>
+                <ul class="list-disc list-inside space-y-2 text-slate-700">
+                    <li><strong class="text-blue-600">準備工作：</strong>確認你需要的帳號</li>
+                    <li><strong class="text-blue-600">步驟一：</strong>建立一個全新的 LINE 官方帳號</li>
+                    <li><strong class="text-blue-600">步驟二：</strong>取得串接所需的 API 金鑰</li>
+                    <li><strong class="text-blue-600">步驟三：</strong>在 AI 小幫手後台完成設定</li>
+                    <li><strong class="text-green-600">最終目標：</strong>成功在 LINE 上與你的專屬 AI 助理對話！</li>
+                </ul>
+            </div>
+
+            <!-- Slide 2: Prerequisites -->
+            <div id="slide-2" class="slide">
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">開始前的準備工作</h3>
+                <p class="mb-4">在我們開始之前，請確認你已經擁有以下兩個帳號。整個過程完全免費。</p>
+                <div class="space-y-4">
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                        <h4 class="font-bold text-lg text-blue-800">1. 你的個人 LINE 帳號</h4>
+                        <p class="text-blue-700">這將用來登入 LINE 的官方後台，以建立及管理你的機器人。</p>
+                    </div>
+                    <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg">
+                        <h4 class="font-bold text-lg text-green-800">2. AI 小幫手 (thisnote.space) 帳號</h4>
+                        <p class="text-green-700 mb-4">這是我們 AI 機器人的大腦。你需要註冊一個帳號來取得串接服務。</p>
+                        <a href="https://thisnote.space/" target="_blank" class="inline-block bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">
+                            前往 thisnote.space 註冊
+                        </a>
+                    </div>
+                </div>
+                <p class="mt-8 text-slate-600">都準備好了嗎？讓我們進入第一步！</p>
+            </div>
+
+            <!-- Slide 3: Step 1 - Create LINE OA -->
+            <div id="slide-3" class="slide">
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">步驟一：建立 LINE 官方帳號</h3>
+                <p class="mb-4">首先，我們要為你的 AI 助理建立一個在 LINE 上的「家」。</p>
+                <ol class="list-decimal list-inside space-y-3 text-slate-700">
+                    <li>前往 <a href="https://manager.line.biz/" target="_blank" class="text-blue-600 hover:underline">LINE Official Account Manager</a> 網站。</li>
+                    <li>點擊「<strong>免費開設帳號</strong>」，並使用你的個人 LINE 帳號登入。</li>
+                    <li>依照畫面指示，填寫你的「<strong>帳號名稱</strong>」（這會是你的機器人名稱）、電子郵件與公司/品牌資訊。</li>
+                    <li>完成建立後，你會得到一個官方帳號，並進入管理後台。</li>
+                </ol>
+                <div class="mt-6 bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 p-4 rounded-r-lg">
+                    <p class="font-bold">提示：</p>
+                    <p>帳號名稱可以取個有趣的名字，例如「小亮的 AI大腦」或「萬事通助理」。這個名稱之後還可以修改。</p>
+                </div>
+            </div>
+
+            <!-- Slide 4: Step 2 - Enable Messaging API -->
+            <div id="slide-4" class="slide">
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">步驟二：啟用 Messaging API</h3>
+                <p class="mb-4">為了讓「AI 小幫手」平台能控制你的 LINE 帳號，我們需要啟用 API (應用程式介面) 功能。</p>
+                <ol class="list-decimal list-inside space-y-3 text-slate-700">
+                    <li>在 LINE 官方帳號後台，點擊右上角的「<strong>設定</strong>」。</li>
+                    <li>在左側選單中，點選「<strong>Messaging API</strong>」。</li>
+                    <li>畫面會顯示「啟用 Messaging API」，勇敢地按下去！</li>
+                    <li>接著，你需要建立一個「<strong>服務提供者 (Provider)</strong>」，可以填寫你自己的名字或品牌名稱，然後按「確定」。</li>
+                    <li>完成後，你就成功開啟了讓外部服務與你的 LINE 帳號溝通的橋樑！</li>
+                </ol>
+                 <div class="mt-6 bg-indigo-50 border-l-4 border-indigo-500 text-indigo-800 p-4 rounded-r-lg">
+                    <p class="font-bold">核心概念：</p>
+                    <p>啟用 Messaging API 就像是把機器人的「遙控權」交出來，讓 `thisnote.space` 平台可以代替你回覆訊息。</p>
+                </div>
+            </div>
+
+            <!-- Slide 5: Step 3 - Get API Keys -->
+            <div id="slide-5" class="slide">
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">步驟三：取得 LINE API 金鑰</h3>
+                <p class="mb-4">接下來是最關鍵的一步：我們要從 LINE Developers 取得兩組重要的「金鑰」，它們就像是 AI 助理的帳號密碼。</p>
+                <p class="mb-4">在啟用 Messaging API 之後，你會被導向到 <strong>LINE Developers</strong> 的設定頁面。請找到並複製以下兩項資訊：</p>
+                <div class="space-y-4 my-6">
+                    <div>
+                        <p class="font-semibold mb-1">1. Channel Secret (通道祕鑰)</p>
+                        <div class="key-item">Channel Secret</div>
+                        <p class="text-sm text-slate-500 mt-1">這是一長串的字元，代表你的機器人身份。請直接複製它。</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold mb-1">2. Channel Access Token (通道存取權杖)</p>
+                         <div class="key-item">Channel access token (long-lived)</div>
+                        <p class="text-sm text-slate-500 mt-1">你需要點擊「<strong>Issue (發行)</strong>」按鈕來產生一組新的權杖，然後再複製它。</p>
+                    </div>
+                </div>
+                <p class="font-bold text-red-600">請妥善保管這兩組金鑰，不要洩漏給他人！我們下一步就會用到它們。</p>
+            </div>
+
+            <!-- Slide 6: Step 4 - Configure AI Assistant -->
+            <div id="slide-6" class="slide">
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">步驟四：設定 AI 小幫手後台</h3>
+                <p class="mb-4">現在，帶著我們剛剛取得的兩把金鑰，回到「AI 小幫手」的家，告訴它如何與你的 LINE 帳號聯繫。</p>
+                <ol class="list-decimal list-inside space-y-3 text-slate-700">
+                    <li>登入 <a href="https://thisnote.space/botManager" target="_blank" class="text-green-600 hover:underline">thisnote.space 的 Bot Manager</a>。</li>
+                    <li>新增一個機器人，並為它取一個好記的名字。</li>
+                    <li>你會看到兩個欄位：</li>
+                    <ul class="list-disc list-inside ml-6 my-2 space-y-2">
+                        <li><strong>Channel Secret</strong></li>
+                        <li><strong>Channel Access Token</strong></li>
+                    </ul>
+                    <li>將上一步從 LINE Developers 複製的兩組金鑰，分別貼到對應的欄位中。</li>
+                    <li>儲存設定。此時，AI 小幫手的後台就已經知道要跟哪個 LINE 帳號溝通了。</li>
+                </ol>
+            </div>
+
+            <!-- Slide 7: Step 5 - Setup Webhook -->
+            <div id="slide-7" class="slide">
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">步驟五：設定 Webhook，完成最後一哩路！</h3>
+                <p class="mb-4">我們已經建立了從 AI 小幫手到 LINE 的單向連結。現在要設定反向的路，讓 LINE 知道要把收到的訊息傳給誰處理。</p>
+                <ol class="list-decimal list-inside space-y-3 text-slate-700">
+                    <li>在 AI 小幫手 (thisnote.space) 的機器人設定頁面，複製「<strong>Webhook URL</strong>」。
+                        <div class="key-item my-2">Webhook URL</div>
+                    </li>
+                    <li>回到 <strong>LINE Developers</strong> 的設定頁面。</li>
+                    <li>找到「<strong>Webhook settings</strong>」區塊，將剛剛複製的 URL 貼到「<strong>Webhook URL</strong>」欄位中，並點擊「Update」。</li>
+                    <li>最重要的一步：將下方的「<strong>Use webhook</strong>」開關切換為啟用 (Enabled) 狀態。</li>
+                </ol>
+                <div class="mt-6 p-4 bg-green-50 border border-green-300 rounded-lg">
+                    <p class="font-bold text-green-800">🎉 恭喜！雙向串接已完成！</p>
+                    <p class="text-green-700">現在起，任何傳送到你 LINE 官方帳號的訊息，都會被自動轉發到 AI 小幫手平台進行處理。</p>
+                </div>
+            </div>
+
+            <!-- Slide 8: Step 6 - Test your Bot -->
+            <div id="slide-8" class="slide">
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">步驟六：測試你的 AI 助理！</h3>
+                <p class="mb-4">是時候跟你的新助理打聲招呼了！</p>
+                 <ol class="list-decimal list-inside space-y-3 text-slate-700">
+                    <li>回到 LINE 官方帳號後台，在「<strong>帳號設定</strong>」中可以找到你機器人的「<strong>基本ID</strong>」或「<strong>QR Code</strong>」。</li>
+                    <li>用你的手機 LINE App，透過 ID 搜尋或掃描 QR Code，將你的機器人加為好友。</li>
+                    <li>打開聊天室，隨意傳送一則訊息，例如「你好，你是誰？」或「幫我規劃明天去台北的行程」。</li>
+                    <li>如果設定正確，你應該會立刻收到來自 AI 小幫手的回覆！</li>
+                </ol>
+                <div class="mt-6 bg-blue-50 border-l-4 border-blue-500 text-blue-700 p-4 rounded-r-lg">
+                    <p class="font-bold">疑難排解：</p>
+                    <p>如果沒有收到回覆，請回頭檢查步驟 5 和 7 的金鑰與 Webhook URL 是否都已正確複製貼上，且 Webhook 功能已啟用。</p>
+                </div>
+            </div>
+
+            <!-- Slide 9: Features -->
+            <div id="slide-9" class="slide">
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">你的 AI 助理能做什麼？</h3>
+                <p class="mb-6">這個 AI 助理不只會聊天，它還內建了許多強大功能，能幫你處理各種任務：</p>
+                <div class="space-y-4">
+                    <div class="p-4 bg-slate-50 rounded-lg border">
+                        <p class="font-bold text-lg text-blue-800">會議/語音轉文字</p>
+                        <p class="text-slate-700">在對話框輸入「會議錄音模式」，接著傳送語音訊息，AI 就會自動將語音轉為帶有標點符號的逐字稿。</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-lg border">
+                        <p class="font-bold text-lg text-green-800">文件分析與問答</p>
+                        <p class="text-slate-700">在 AI 小幫手後台上傳 PDF 或其他文件，你就可以在 LINE 上直接對文件內容進行提問，讓 AI 幫你找答案、做總結。</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-lg border">
+                        <p class="font-bold text-lg text-purple-800">AI 繪圖</p>
+                        <p class="text-slate-700">輸入「畫圖」加上你的描述 (例如：「畫圖 一隻貓在太空中」)，AI 就會為你生成獨一無二的圖片。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 10: Conclusion -->
+            <div id="slide-10" class="slide">
+                <h3 class="text-2xl font-bold text-slate-800 mb-4">恭喜！你已解鎖 AI 新技能</h3>
+                <p class="mb-4 text-lg">你已成功建立並串接了一個完全屬於你自己的 LINE AI 助理。這不僅是一個聊天機器人，更是一個能融入你工作與生活的強大工具。</p>
+                <p class="font-semibold mb-2">關鍵回顧：</p>
+                <ul class="list-none space-y-2">
+                    <li class="flex items-start"><span class="text-green-500 mr-2">✅</span> <strong>建立官方帳號：</strong>為 AI 打造一個 LINE 上的家。</li>
+                    <li class="flex items-start"><span class="text-green-500 mr-2">✅</span> <strong>取得 API 金鑰：</strong>獲得控制 LINE 帳號的鑰匙。</li>
+                    <li class="flex items-start"><span class="text-green-500 mr-2">✅</span> <strong>設定 Webhook：</strong>建立 LINE 與 AI 之間雙向溝通的橋樑。</li>
+                    <li class="flex items-start"><span class="text-green-500 mr-2">✅</span> <strong>善用強大功能：</strong>發揮語音轉文字、文件分析等實用功能。</li>
+                </ul>
+                <div class="mt-8 text-center p-6 bg-blue-50 rounded-lg">
+                    <p class="mb-4">想探索更多 AI 小幫手的進階用法嗎？</p>
+                    <a href="https://thisnote.space/botManager/tutorial" target="_blank" class="inline-block bg-blue-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors">
+                        📌 查看官方完整教學
+                    </a>
+                </div>
+                <p class="mt-8 text-center text-xl">現在就開始，讓你的專屬 AI 助理為你服務吧！</p>
+            </div>
+
+        </main>
+
+        <!-- Navigation Buttons -->
+        <footer class="flex justify-between items-center mt-8">
+            <button id="prev-btn" class="bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                上一頁
+            </button>
+            <div id="slide-counter" class="text-sm text-slate-500"></div>
+            <button id="next-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                下一頁
+            </button>
+        </footer>
+
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 1;
+
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const slideCounter = document.getElementById('slide-counter');
+        const progressBar = document.getElementById('progress-bar');
+        
+        // Create progress bar indicators
+        for (let i = 0; i < totalSlides; i++) {
+            const step = document.createElement('div');
+            step.className = 'step-indicator w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold text-sm md:text-base cursor-pointer mt-2';
+            step.textContent = i + 1;
+            step.dataset.slide = i + 1;
+            progressBar.appendChild(step);
+            step.addEventListener('click', () => {
+                currentSlide = i + 1;
+                showSlide(currentSlide);
+            });
+        }
+        const stepIndicators = document.querySelectorAll('.step-indicator');
+
+        function showSlide(slideNumber) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            const newSlide = document.getElementById(`slide-${slideNumber}`);
+            if (newSlide) {
+                newSlide.classList.add('active');
+            }
+            
+            updateNavigation();
+        }
+
+        function updateNavigation() {
+            // Update buttons
+            prevBtn.disabled = currentSlide === 1;
+            nextBtn.disabled = currentSlide === totalSlides;
+            if (currentSlide === totalSlides) {
+                nextBtn.textContent = '教學結束';
+            } else {
+                nextBtn.textContent = '下一頁';
+            }
+
+            // Update counter
+            slideCounter.textContent = `第 ${currentSlide} / ${totalSlides} 頁`;
+
+            // Update progress bar
+            stepIndicators.forEach((indicator, index) => {
+                const slideNum = index + 1;
+                indicator.classList.remove('active', 'completed');
+                if (slideNum < currentSlide) {
+                    indicator.classList.add('completed');
+                } else if (slideNum === currentSlide) {
+                    indicator.classList.add('active');
+                }
+            });
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentSlide > 1) {
+                currentSlide--;
+                showSlide(currentSlide);
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentSlide < totalSlides) {
+                currentSlide++;
+                showSlide(currentSlide);
+            }
+        });
+
+        // Initial setup
+        showSlide(currentSlide);
+    </script>
+
+</body>
+</html>

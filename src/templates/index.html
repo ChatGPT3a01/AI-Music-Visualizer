@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eye Music - AI 音樂視覺化生成平台</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 頂部導航 -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <i class="fas fa-eye"></i>
+                <h1>Eye Music</h1>
+            </div>
+            <nav class="nav">
+                <a href="#upload" class="nav-link active">上傳</a>
+                <a href="#settings" class="nav-link">設定</a>
+                <a href="#preview" class="nav-link">預覽</a>
+                <a href="#about" class="nav-link">關於</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 主要內容區 -->
+    <main class="main-content">
+        <div class="container">
+
+            <!-- 步驟指示器 -->
+            <div class="steps">
+                <div class="step active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-label">上傳音樂</div>
+                </div>
+                <div class="step-line"></div>
+                <div class="step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-label">設定參數</div>
+                </div>
+                <div class="step-line"></div>
+                <div class="step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-label">生成影片</div>
+                </div>
+            </div>
+
+            <!-- 上傳區域 -->
+            <section id="upload" class="section upload-section">
+                <div class="card">
+                    <h2><i class="fas fa-upload"></i> 上傳音樂檔案</h2>
+
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>拖放音樂檔案到此處，或點擊選擇檔案</p>
+                        <p class="file-hint">支援格式: MP3, WAV, FLAC, OGG, M4A, AAC</p>
+                        <input type="file" id="audioFile" accept=".mp3,.wav,.flac,.ogg,.m4a,.aac" hidden>
+                        <button class="btn btn-primary" onclick="document.getElementById('audioFile').click()">
+                            <i class="fas fa-folder-open"></i> 選擇檔案
+                        </button>
+                    </div>
+
+                    <div class="file-info" id="fileInfo" style="display: none;">
+                        <div class="file-item">
+                            <i class="fas fa-music"></i>
+                            <div class="file-details">
+                                <div class="file-name" id="fileName"></div>
+                                <div class="file-meta" id="fileMeta"></div>
+                            </div>
+                            <button class="btn-icon" onclick="removeFile()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 設定區域 -->
+            <section id="settings" class="section settings-section" style="display: none;">
+                <div class="card">
+                    <h2><i class="fas fa-sliders-h"></i> 視覺化設定</h2>
+
+                    <!-- 預設模板 -->
+                    <div class="presets">
+                        <h3>快速選擇模板</h3>
+                        <div class="preset-grid" id="presetGrid">
+                            <!-- 動態載入 -->
+                        </div>
+                    </div>
+
+                    <!-- 視覺化類型 -->
+                    <div class="setting-group">
+                        <label>視覺化類型</label>
+                        <select id="visualizationType" class="input-select">
+                            <option value="spectrum_bars">頻譜能量條</option>
+                            <option value="circular_spectrum">圓形頻譜</option>
+                            <option value="piano_roll">鋼琴瀑布流</option>
+                        </select>
+                    </div>
+
+                    <!-- 色彩方案 -->
+                    <div class="setting-group">
+                        <label>色彩方案</label>
+                        <select id="colorScheme" class="input-select">
+                            <option value="rainbow">彩虹色</option>
+                            <option value="fire">火焰色</option>
+                            <option value="ocean">海洋色</option>
+                            <option value="purple">紫色系</option>
+                        </select>
+                    </div>
+
+                    <!-- 解析度 -->
+                    <div class="setting-group">
+                        <label>影片解析度</label>
+                        <select id="resolution" class="input-select">
+                            <option value="1920,1080">1920x1080 (Full HD)</option>
+                            <option value="1280,720">1280x720 (HD)</option>
+                            <option value="2560,1440">2560x1440 (2K)</option>
+                            <option value="3840,2160">3840x2160 (4K)</option>
+                        </select>
+                    </div>
+
+                    <!-- FPS -->
+                    <div class="setting-group">
+                        <label>影片幀率 (FPS): <span id="fpsValue">30</span></label>
+                        <input type="range" id="fps" min="24" max="60" value="30" class="slider">
+                    </div>
+
+                    <!-- 頻譜高度倍率 -->
+                    <div class="setting-group">
+                        <label>頻譜高度倍率: <span id="heightMultiplierValue">1.0</span></label>
+                        <input type="range" id="heightMultiplier" min="0.5" max="2.0" step="0.1" value="1.0" class="slider">
+                    </div>
+
+                    <!-- 透明度 -->
+                    <div class="setting-group">
+                        <label>頻譜透明度: <span id="opacityValue">0.8</span></label>
+                        <input type="range" id="opacity" min="0.1" max="1.0" step="0.1" value="0.8" class="slider">
+                    </div>
+
+                    <!-- 背景顏色 -->
+                    <div class="setting-group">
+                        <label>背景顏色</label>
+                        <input type="color" id="backgroundColor" value="#000000" class="input-color">
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="goToStep(1)">
+                            <i class="fas fa-arrow-left"></i> 返回
+                        </button>
+                        <button class="btn btn-primary" onclick="goToStep(3)">
+                            繼續 <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 生成區域 -->
+            <section id="generate" class="section generate-section" style="display: none;">
+                <div class="card">
+                    <h2><i class="fas fa-magic"></i> 生成視覺化影片</h2>
+
+                    <div class="preview-container" id="previewContainer">
+                        <div class="preview-placeholder">
+                            <i class="fas fa-video"></i>
+                            <p>準備生成視覺化影片</p>
+                        </div>
+                    </div>
+
+                    <div class="progress-container" id="progressContainer" style="display: none;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="progress-text" id="progressText">準備中...</div>
+                    </div>
+
+                    <div class="result-container" id="resultContainer" style="display: none;">
+                        <div class="result-success">
+                            <i class="fas fa-check-circle"></i>
+                            <h3>影片生成完成！</h3>
+                            <button class="btn btn-success" id="downloadBtn">
+                                <i class="fas fa-download"></i> 下載影片
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="btn btn-secondary" onclick="goToStep(2)">
+                            <i class="fas fa-arrow-left"></i> 返回設定
+                        </button>
+                        <button class="btn btn-primary" id="generateBtn" onclick="startGeneration()">
+                            <i class="fas fa-play"></i> 開始生成
+                        </button>
+                        <button class="btn btn-primary" onclick="resetAll()">
+                            <i class="fas fa-redo"></i> 重新開始
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- 頁腳 -->
+    <footer class="footer">
+        <div class="container">
+            <p>© 2025 AI MUSIC 可視化生成平台</p>
+            <p>Made with <i class="fas fa-heart"></i> by 阿亮老師（曾慶良）</p>
+        </div>
+    </footer>
+
+    <!-- 載入提示 -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-spinner">
+            <i class="fas fa-circle-notch fa-spin"></i>
+            <p>處理中...</p>
+        </div>
+    </div>
+
+    <!-- 通知訊息 -->
+    <div class="toast" id="toast"></div>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
