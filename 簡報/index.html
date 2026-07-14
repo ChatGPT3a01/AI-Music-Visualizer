@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CH12 · AI Music 音樂視覺化系統</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Microsoft JhengHei','Segoe UI',Arial,sans-serif; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); min-height:100vh; overflow:hidden; color:#333; }
+  .nav-bar { position:fixed; top:0; left:0; right:0; height:60px; background:rgba(255,255,255,.15); backdrop-filter:blur(12px); border-bottom:1px solid rgba(255,255,255,.2); display:flex; justify-content:space-between; align-items:center; padding:0 30px; z-index:10000; box-shadow:0 4px 6px rgba(0,0,0,.1); }
+  .nav-title { font-size:22px; font-weight:700; color:#fff; letter-spacing:1px; text-shadow:0 2px 4px rgba(0,0,0,.2); }
+  .nav-buttons { display:flex; gap:12px; }
+  .nav-btn { background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4); color:#fff; padding:6px 16px; border-radius:20px; cursor:pointer; font-size:14px; font-weight:600; text-decoration:none!important; transition:all .3s; }
+  .nav-btn:hover { background:rgba(255,255,255,.4); transform:translateY(-2px); }
+  .nav-arrow { position:fixed; top:50%; transform:translateY(-50%); background:rgba(255,255,255,.25); color:#fff; width:60px; height:60px; border-radius:50%; border:2px solid rgba(255,255,255,.4); font-size:24px; cursor:pointer; z-index:9000; transition:all .3s; display:flex; align-items:center; justify-content:center; }
+  .nav-arrow:hover { background:rgba(255,255,255,.5); transform:translateY(-50%) scale(1.1); }
+  .prev-arrow { left:30px; } .next-arrow { right:30px; }
+  .nav-arrow:disabled { opacity:.3; cursor:not-allowed; }
+  .slide-container { width:100%; height:100vh; padding-top:60px; position:relative; z-index:1; }
+  .slide { position:absolute; top:60px; left:0; width:100%; height:calc(100vh - 60px); display:none; align-items:center; justify-content:center; padding:40px; opacity:0; transition:opacity .4s; z-index:10; }
+  .slide.active { display:flex; opacity:1; z-index:20; }
+  .content-card { background:rgba(255,255,255,.98); border-radius:24px; box-shadow:0 20px 50px rgba(0,0,0,.3); padding:56px; max-width:1400px; width:95%; max-height:88vh; overflow-y:auto; }
+  h1 { color:#667eea; font-size:52px; margin-bottom:24px; text-align:center; }
+  h2 { color:#764ba2; font-size:36px; margin-bottom:26px; border-bottom:3px solid #667eea; padding-bottom:12px; }
+  h3 { color:#667eea; font-size:23px; margin:4px 0 8px; }
+  p,li { font-size:21px; line-height:1.85; color:#444; margin-bottom:12px; }
+  ul,ol { margin-left:28px; }
+  .subtitle { font-size:28px; color:#666; text-align:center; margin-bottom:20px; }
+  .highlight { background:linear-gradient(120deg,#667eea,#764ba2); padding:4px 12px; border-radius:6px; font-weight:bold; color:#fff; display:inline-block; margin:3px; }
+  .tag-container { display:flex; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:30px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:20px; margin-top:22px; }
+  .card { background:linear-gradient(145deg,#f8f9ff,#fff); padding:26px; border-radius:16px; border:2px solid #e8eaff; transition:all .3s; }
+  .card:hover { transform:translateY(-6px); border-color:#667eea; box-shadow:0 10px 26px rgba(102,126,234,.2); }
+  .ico { font-size:44px; display:block; margin-bottom:10px; }
+  .box { padding:22px 25px; border-radius:12px; margin:20px 0; border-left:6px solid; font-size:20px; }
+  .info { background:#e8f4fd; border-color:#667eea; color:#1a365d; }
+  .success { background:#e6ffed; border-color:#48bb78; color:#22543d; }
+  .flow { display:flex; align-items:center; justify-content:center; gap:12px; flex-wrap:wrap; margin:24px 0; }
+  .flow .node { background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; padding:14px 20px; border-radius:14px; font-size:19px; font-weight:700; }
+  .flow .arr { font-size:26px; color:#764ba2; }
+  .indicators { position:fixed; bottom:25px; left:50%; transform:translateX(-50%); display:flex; gap:12px; z-index:4000; padding:10px 25px; background:rgba(0,0,0,.3); border-radius:30px; backdrop-filter:blur(5px); }
+  .dot { width:12px; height:12px; background:rgba(255,255,255,.4); border-radius:50%; cursor:pointer; transition:all .3s; }
+  .dot.active { background:#fff; transform:scale(1.3); }
+</style>
+</head>
+<body>
+<div class="nav-bar">
+  <div class="nav-title">自己架設 AI | CH12：AI Music 音樂視覺化系統</div>
+  <div class="nav-buttons">
+    <button class="nav-btn" onclick="goToSlide(0)">首頁</button>
+    <button class="nav-btn" onclick="toggleFullscreen()">全螢幕</button>
+    <a href="https://www.youtube.com/@Liang-yt02" target="_blank" class="nav-btn">YT</a>
+  </div>
+</div>
+<div class="slide-container">
+
+  <div class="slide active"><div class="content-card" style="text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center;">
+    <p style="color:#764ba2;letter-spacing:3px;font-size:18px;margin-bottom:10px;">自己架設 AI · 零基礎到大師 | CH12</p>
+    <h1 style="font-size:58px;">AI Music 音樂視覺化系統</h1>
+    <p class="subtitle">把「聽得見的音樂」變成「看得見的影片」</p>
+    <div class="tag-container"><span class="highlight">音訊分析</span><span class="highlight">即時進度</span><span class="highlight">雙 AI 分工</span><span class="highlight">影片輸出</span></div>
+    <p style="margin-top:40px;color:#888;font-size:18px;">曾慶良（阿亮老師）| 3A 科技研究室</p>
+  </div></div>
+
+  <div class="slide"><div class="content-card">
+    <h2>本章學習目標</h2>
+    <div class="grid">
+      <div class="card"><span class="ico">🎼</span><h3>音訊數位分析</h3><p>STFT 短時傅立葉、梅爾頻譜、色度特徵、節拍追蹤——把音樂轉成數據。</p></div>
+      <div class="card"><span class="ico">⚡</span><h3>即時進度回報</h3><p>Flask + Socket.IO，用 WebSocket 雙向通訊即時回報處理進度。</p></div>
+      <div class="card"><span class="ico">🎨</span><h3>三種視覺化模式</h3><p>頻譜能量條、圓形頻譜、鋼琴瀑布流 × 四種色彩方案。</p></div>
+      <div class="card"><span class="ico">🤖</span><h3>雙 AI 智慧分工</h3><p>快速分析用 Gemini、創意生成用 GPT，理解模型選擇策略。</p></div>
+    </div>
+  </div></div>
+
+  <div class="slide"><div class="content-card">
+    <h2>音樂如何變成數據？</h2>
+    <div class="grid">
+      <div class="card"><span class="ico">📊</span><h3>STFT 頻譜</h3><p>把聲音切成小片段做傅立葉轉換，看到「哪個時間有哪些頻率」。</p></div>
+      <div class="card"><span class="ico">🎹</span><h3>梅爾頻譜</h3><p>模擬人耳對音高的感受，比原始頻譜更貼近聽感。</p></div>
+      <div class="card"><span class="ico">🌈</span><h3>色度特徵</h3><p>抓出 12 個半音的能量，判斷和弦與調性。</p></div>
+      <div class="card"><span class="ico">🥁</span><h3>節拍追蹤</h3><p>偵測 BPM 與節拍點，讓視覺跟著鼓點跳動。</p></div>
+    </div>
+    <div class="box info">🎯 核心觀念：所有炫麗的視覺效果，背後都是「把聲音變成一連串數字」再畫出來。</div>
+  </div></div>
+
+  <div class="slide"><div class="content-card">
+    <h2>音訊處理工具鏈</h2>
+    <div class="flow">
+      <div class="node">🎵 librosa<br><span style="font-size:14px;font-weight:400">音訊分析</span></div>
+      <div class="arr">→</div>
+      <div class="node">🖼️ Pillow<br><span style="font-size:14px;font-weight:400">逐格畫面</span></div>
+      <div class="arr">→</div>
+      <div class="node">🎬 moviepy<br><span style="font-size:14px;font-weight:400">組成影片</span></div>
+      <div class="arr">→</div>
+      <div class="node">📦 FFmpeg<br><span style="font-size:14px;font-weight:400">影片編碼</span></div>
+    </div>
+    <div class="box info">每個工具負責一段：librosa 分析 → Pillow 一格一格畫 → moviepy 串成動畫 → FFmpeg 壓成 MP4。</div>
+    <div class="box success">💡 沒有 AI API Key 也能用！核心的「上傳→分析→生成影片」照跑，只是少了 AI 推薦參數。</div>
+  </div></div>
+
+  <div class="slide"><div class="content-card">
+    <h2>視覺化模式 &amp; 批次任務</h2>
+    <div class="grid">
+      <div class="card"><span class="ico">📶</span><h3>頻譜能量條</h3><p>經典跳動長條，最直覺。</p></div>
+      <div class="card"><span class="ico">⭕</span><h3>圓形頻譜</h3><p>環形律動，適合封面。</p></div>
+      <div class="card"><span class="ico">🌊</span><h3>鋼琴瀑布流</h3><p>音符如瀑布落下，音樂感十足。</p></div>
+    </div>
+    <div class="box info">📋 用 Google Apps Script + Google Sheets 建立<strong>批次任務管理</strong>：多首歌自動排程、記錄，不用一首一首手動跑。</div>
+  </div></div>
+
+  <div class="slide"><div class="content-card" style="text-align:center;">
+    <h2 style="border:none;">CH12 重點回顧</h2>
+    <div class="grid" style="text-align:left;">
+      <div class="card"><h3>做出什麼</h3><p>上傳音樂 → 自動分析 → 產出視覺化影片。</p></div>
+      <div class="card"><h3>核心原理</h3><p>STFT／梅爾頻譜／色度／節拍，把聲音數據化。</p></div>
+      <div class="card"><h3>即時互動</h3><p>Socket.IO WebSocket 即時回報處理進度。</p></div>
+      <div class="card"><h3>AI 分工</h3><p>Gemini 快分析、GPT 做創意，各取所長。</p></div>
+    </div>
+    <p style="margin-top:34px;font-size:26px;color:#667eea;font-weight:bold;">下一章：CH13 · AI 建置到班打卡系統</p>
+  </div></div>
+
+</div>
+<button class="nav-arrow prev-arrow" id="prevBtn" onclick="changeSlide(-1)">❮</button>
+<button class="nav-arrow next-arrow" id="nextBtn" onclick="changeSlide(1)">❯</button>
+<div class="indicators" id="indicatorContainer"></div>
+<script>
+  let currentSlide=0; const slides=document.querySelectorAll('.slide'); const total=slides.length;
+  function init(){ const c=document.getElementById('indicatorContainer'); slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot';d.onclick=()=>goToSlide(i);c.appendChild(d);}); show(0); document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')changeSlide(-1);if(e.key==='ArrowRight')changeSlide(1);}); }
+  function show(i){ if(i<0)i=0; if(i>=total)i=total-1; slides.forEach(s=>s.classList.remove('active')); slides[i].classList.add('active'); currentSlide=i; document.querySelectorAll('.dot').forEach((d,x)=>d.classList.toggle('active',x===i)); document.getElementById('prevBtn').disabled=i===0; document.getElementById('nextBtn').disabled=i===total-1; }
+  function changeSlide(d){ show(currentSlide+d); } function goToSlide(i){ show(i); }
+  function toggleFullscreen(){ if(!document.fullscreenElement)document.documentElement.requestFullscreen(); else if(document.exitFullscreen)document.exitFullscreen(); }
+  init();
+</script>
+</body>
+</html>
